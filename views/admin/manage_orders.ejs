@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Manage Orders</title>
+    <%- include('../header_files') %>
+</head>
+<body onload="getPendingOrdersData();">
+
+<%- include('../navbar') %>
+
+<div class="container mt-5 py-5">
+    <div class="text-center">
+        <h2 class="text-decoration-underline">Pending Orders</h2>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered mt-3 table-dark">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Username</th>
+                <th>Order Date</th>
+                <th>Address</th>
+                <th>Payment Mode</th>
+                <th>Payment Status</th>
+                <th>Ship Order</th>
+            </tr>
+            </thead>
+
+            <tbody id="pendingOrder"></tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade mt-5" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Add Shipping Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="shippingForm">
+                    <input type="hidden" id="oid">
+
+                    <div class="mb-3">
+                        <label for="company">Company Name</label>
+                        <input type="text" id="company" class="form-control">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="trackID">Tracking ID</label>
+                        <input type="text" id="trackID" class="form-control">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="url">Tracking URL</label>
+                        <input type="text" id="url" class="form-control">
+                    </div>
+
+                    <div class="mb-3">
+                        <button onclick="ShipOrderNow()" type="button" class="btn btn-success">SHIP NOW</button>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include("../footer_scripts") %>
+
+<script>
+    function ShipOrderNow() {
+        var company = document.getElementById("company").value;
+        var trackID = document.getElementById("trackID").value;
+        var url = document.getElementById("url").value;
+        var oid = document.getElementById("oid").value;
+
+        var formData = new FormData();
+        formData.append("company", company);
+        formData.append("trackID", trackID);
+        formData.append("url", url);
+        formData.append("oid", oid);
+
+        var http = new XMLHttpRequest();
+        http.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                // console.log(this.response);
+                if (this.response == "error") {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Internal Server Error"
+                    });
+                } else {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Order Shipped Successfully."
+                    });
+                    getPendingOrdersData();
+                    document.getElementById("shippingForm").reset();
+                }
+            }
+        }
+        http.open("POST", "/admin/ship-order-now", true);
+        http.send(formData);
+    }
+
+    function showModal(order_id) {
+        // console.log(order_id);
+        document.getElementById("oid").value = order_id;
+
+        $("#exampleModal").modal("show");
+    }
+
+    function getPendingOrdersData() {
+        var http = new XMLHttpRequest();
+        http.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                // console.log(JSON.parse(this.response));
+
+                if (this.response == "error") {
+                    Swal.fire({
+                        icon: "success",
+                        title: 'Internal Server Error'
+                    });
+                } else {
+                    var response = JSON.parse(this.response);
+                    // console.log(response);
+                    var table = "";
+
+                    if (response.length == 0) {
+                        table = `<tr><th colspan="7" class="text-center"><h2 class="text-danger">No Data Found</h2></th></tr>`;
+                        document.getElementById("pendingOrder").innerHTML = table;
+                    } else {
+                        for (var i = 0; i < response.length; i++) {
+                            table += `<tr>`;
+                            table += `<td>${i + 1}</td>`;
+                            table += `<td>${response[i].username}</td>`;
+                            table += `<td>${response[i].date_time}</td>`;
+                            table += `<td>${response[i].address}, ${response[i].city} ${response[i].pincode}</td>`;
+                            table += `<td>${response[i].payment_mode}</td>`;
+                            table += `<td>${response[i].payment_status}</td>`;
+                            table += `<td>`;
+                            table += `<button onclick="showModal(${response[i].id})" type="button" class="btn btn-success btn-sm">Ship Order</button>`;
+                            table += `</td>`;
+                            table += `</tr>`;
+                        }
+                        document.getElementById("pendingOrder").innerHTML = table;
+                    }
+                }
+            }
+        }
+        http.open("GET", "/admin/fetch-pending-order", true);
+        http.send();
+    }
+</script>
+
+</body>
+</html>

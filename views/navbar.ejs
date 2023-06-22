@@ -1,0 +1,59 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+        <a class="navbar-brand " href="#" style="color: #4bc74b">
+            <i class="fas fa-shopping-basket fa-1.5x amber-text pr-3" aria-hidden="true" style="color: #4bc74b"></i>  FRESH FARM
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+                <li class="nav-item">
+                    <a class="nav-link active" style="color: #4bc74b" aria-current="page" href="/">Home </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link active" style="color: #4bc74b" aria-current="page" href="/admin-home">Admin Home</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link active" style="color: #4bc74b" href="/manage-category">Manage Category</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link active" style="color: #4bc74b" href="/manage-sub-category">Manage Sub-Category</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link active" style="color: #4bc74b" href="/manage-product">Manage Product</a>
+                </li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" style="color: #4bc74b" href="#" id="navbarDropdown" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Manage Orders
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" style="color: #4bc74b" href="/admin/pending-orders">Pending Orders</a></li>
+                        <li><a class="dropdown-item" style="color:#4bc74b" href="/admin/shipped-orders">Shipped Orders</a></li>
+                        <li><a class="dropdown-item" style="color: #4bc74b" href="/admin/delivered-order">Delivered Orders</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" style="color: #4bc74b" href="/admin-change-password">Change Password</a>
+                </li>
+
+<!--                <li class="nav-item">-->
+<!--                    <a class="nav-link active btn btn-info px-4" href="#" onclick="LogoutAdmin()">Logout</a>-->
+<!--                </li>-->
+
+            </ul>
+
+            <form class="d-flex">
+                <button onclick="LogoutAdmin()" class="btn" style="background: #4bc74b; color: #F5F5F5" type="button">Logout</button>
+            </form>
+        </div>
+    </div>
+</nav>

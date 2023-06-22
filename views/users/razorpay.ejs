@@ -1,0 +1,73 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"
+        integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg=="
+        crossorigin="anonymous"></script>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<input type="hidden" id="totalAmount" value="<%= totalAmount %>">
+
+<script>
+    $(document).ready(function () {
+        var grandtotal = document.getElementById("totalAmount").value;
+
+        var options = {
+            "key": "rzp_test_dRWiKHS7zr2Gki",
+            "amount": grandtotal * 100,
+            "name": "Online Shopping",
+            "description": "Online Payment System",
+            "image": "https://cdn3.vectorstock.com/i/1000x1000/98/22/logo-for-grocery-store-vector-21609822.jpg",
+            "handler": function (response) {
+                // console.log(response);
+                // console.log(response.razorpay_payment_id);
+                let http = new XMLHttpRequest();
+                http.onreadystatechange = function () {
+                    if (this.readyState === 4 && this.status === 200) {
+                        // console.log(this.response);
+                        if (this.response === "error") {
+                            Swal.fire({
+                                icon: "error",
+                                title: "Internal Server Error"
+                            });
+                            setTimeout(() => {
+                                window.location.href = "/shopping-cart";
+                            }, 1000);
+                        } else if (this.response === "failed") {
+                            Swal.fire({
+                                icon: "warning",
+                                title: "Payment Failed"
+                            });
+                            setTimeout(() => {
+                                window.location.href = "/checkout";
+                            }, 1000);
+                        } else {
+                            Swal.fire({
+                                icon: "success",
+                                title: "Payment Complete"
+                            });
+                            setTimeout(() => {
+                                window.location.href = "/users/thank-you";
+                            }, 1000);
+                        }
+                    }
+                }
+                http.open("GET", `/users/payment_action?payment_id=${response.razorpay_payment_id}`, true);
+                http.send();
+            },
+            "prefill": {
+                "name": "",
+                "email": ""
+            },
+            "notes": {
+                "address": ""
+            },
+            "theme": {
+                "color": "#942436"
+            }
+        };
+
+        var rzp1 = new Razorpay(options);
+        rzp1.open();
+    });
+</script>

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>User Login</title>
+    <%- include('header_files') %>
+</head>
+<body>
+
+<%- include('guest_navbar') %>
+
+<div class="container mt-5 py-5">
+    <div class="col-md-6 offset-md-3">
+        <div class="card">
+            <div class="card-header bg-dark">
+                <h2 class="text-white">User Login</h2>
+            </div>
+            <div class="card-body">
+                <form id="userSignup">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="username">Enter Username</label>
+                            <input type="text" id="username" name="username" class="form-control">
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <label for="password">Enter Password</label>
+                            <input type="password" id="password" name="password" class="form-control">
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <button onclick="UserLogin()" class="btn btn-dark px-5" type="button">LOGIN</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include("footer_scripts") %>
+
+<script>
+    var UserLogin = () => {
+        var username = document.getElementById("username").value;
+        var password = document.getElementById("password").value;
+
+        var formData = new FormData();
+        formData.append("username", username);
+        formData.append("password", password);
+
+        var http = new XMLHttpRequest();
+        http.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                // console.log(this.response);
+                if (this.response == "error") {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Internal Server Error."
+                    });
+                } else if (this.response == "invalid") {
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Invalid Username or Password."
+                    });
+                } else {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Login Success.",
+                        confirmButtonColor: "#198754"
+                    });
+
+                    setTimeout(() => {
+                        window.location.href = "/users/";
+                    }, 3000);
+                }
+            }
+        }
+
+        http.open("POST", "/user-login", true);
+        http.send(formData);
+    }
+</script>
+
+</body>
+</html>

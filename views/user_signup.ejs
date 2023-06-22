@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>User Signup</title>
+    <%- include('header_files') %>
+</head>
+<body>
+
+<%- include('guest_navbar') %>
+
+<div class="container mt-5 py-5">
+    <div class="card">
+        <div class="card-header bg-dark">
+            <h2 class="text-white">User Signup</h2>
+        </div>
+        <div class="card-body">
+            <form id="userSignup">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="username">Enter Username</label>
+                        <input type="text" id="username" name="username" class="form-control">
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label for="email">Enter Email</label>
+                        <input type="email" id="email" name="email" class="form-control">
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label for="name">Enter Name</label>
+                        <input type="text" id="name" name="name" class="form-control">
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="password">Enter Password</label>
+                        <input type="password" id="password" name="password" class="form-control">
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="confirm">Confirm Password</label>
+                        <input type="password" id="confirm" name="confirm" class="form-control">
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>Gender</label> <br>
+                        <input checked type="radio" id="Male" name="gender" value="Male"> <label for="Male">Male</label>
+                        <input type="radio" id="Female" name="gender" value="Female"> <label for="Female">Female</label>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="photo">Upload Photo</label>
+                        <input type="file" id="photo" name="photo" class="form-control">
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label for="address">Enter Address</label>
+                        <textarea name="address" id="address" class="form-control"></textarea>
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <button onclick="UserSignup()" class="btn btn-dark px-5" type="button">SIGNUP</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<%- include("footer_scripts") %>
+
+<script>
+    var UserSignup = () => {
+        // Method - 1
+        // var username = document.getElementById("username").value;
+        // var email = document.getElementById("email").value;
+        // var name = document.getElementById("name").value;
+        // var password = document.getElementById("password").value;
+        // var photo = document.getElementById("photo").value;
+        // var address = document.getElementById("address").value;
+
+        // Method - 2
+        var controls = document.getElementById("userSignup").elements;
+        var formData = new FormData();
+
+        for (var item of controls) {
+            if (item.type != "button") {
+                if (item.type == "file") {
+                    formData.append(item.id, item.files[0]);
+                } else if (item.type == "radio") {
+                    if (item.checked) {
+                        formData.append(item.name, item.value);
+                    }
+                } else {
+                    formData.append(item.id, item.value);
+                }
+            }
+        }
+
+        var http = new XMLHttpRequest();
+        http.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                // console.log(this.response);
+
+                if (this.response == "empty") {
+                    Swal.fire({
+                        icon: "warning",
+                        title: "All fields are required."
+                    });
+                } else if (this.response == "photo") {
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Please Upload Your Photo."
+                    });
+                } else if (this.response == "notMatched") {
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Password & Confirm Password must be same."
+                    });
+                } else if (this.response == "notUploaded" || this.response == "error") {
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Internal Server Error. Try Again Later."
+                    });
+                } else if (this.response == "userExist") {
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Username already exist."
+                    });
+                } else {
+                    Swal.fire({
+                        icon: "success",
+                        title: "User Registered.",
+                        confirmButtonColor: "#198754"
+                    });
+                    document.getElementById("userSignup").reset();
+                }
+            }
+        }
+        http.open("POST", "/user-signup", true);
+        http.send(formData);
+    }
+</script>
+
+</body>
+</html>

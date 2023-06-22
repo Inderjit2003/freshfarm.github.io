@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= title %></title>
+    <%- include('header_files') %>
+</head>
+<body onload="getProduct()">
+
+<%- include('guest_navbar') %>
+
+<!-- Slider -->
+<div id="carouselExampleIndicators" class="carousel slide " data-bs-ride="carousel">
+    <div class="carousel-indicators">
+        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active"
+                aria-current="true" aria-label="Slide 1"></button>
+        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1"
+                aria-label="Slide 2"></button>
+        <!--        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="3"-->
+        <!--                aria-label="Slide 4"></button>-->
+        <!--        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>-->
+    </div>
+
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <img src="images/slider/banner-bg.png" height="500px" class="d-block w-100" alt="...">
+        </div>
+        <div class="carousel-item">
+            <img src="images/slider/banner-2.png" height="500px" class="d-block w-100" alt="...">
+        </div>
+        <!--        <div class="carousel-item">-->
+        <!--            <img src="images/slider/4.jpg" height="550px" class="d-block w-100" alt="...">-->
+        <!--        </div>-->
+        <!--        <div class="carousel-item">-->
+        <!--            <img src="" class="d-block w-100" alt="...">-->
+        <!--        </div>-->
+    </div>
+
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators"
+            data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators"
+            data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+    </button>
+</div>
+<br><br><br><br>
+<!--About Us-->
+<!--<h1 class="text-center">About Page</h1>-->
+<!--<br><br>-->
+<!--<section>-->
+<!--<div class="row row-cols-md-3 row-cols-md-3 g-4">-->
+<!--    <div class="col">-->
+<!--        <div class="card">-->
+<!--            <img src="images/About Us/feature-img-1.png"  alt="...">-->
+<!--            <div class="card-body">-->
+<!--                <h5 class="card-title">Fresh Products</h5>-->
+<!--                <p class="card-text">We Provides Fresh Products for you <i class="fa-solid fa-face-smile"></i>.</p>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--    <div class="col">-->
+<!--        <div class="card">-->
+<!--            <img src="images/About Us/feature-img-2.png"  alt="...">-->
+<!--            <div class="card-body">-->
+<!--                <h5 class="card-title">Delivery</h5>-->
+<!--                <p class="card-text"> We are providing free delivery to there Cutomers <i class="fa-solid fa-bicycle"></i> .</p>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--    <div class="col">-->
+<!--        <div class="card">-->
+<!--            <img src="images/About Us/feature-img-3.png" alt="...">-->
+<!--            <div class="card-body">-->
+<!--                <h5 class="card-title">Online Payement</h5>-->
+<!--                <p class="card-text">You can Pay with any method you want By Cash , Mobile Payements <i class="fa-brands fa-cc-paypal"></i>.</p>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+<!--</section>-->
+
+<!--category starts-->
+<div class="container py-5">
+    <div class="text-center">
+        <h2 class="text-dark">Categories</h2>
+    </div>
+    <section>
+        <div class="row row-cols-md-3 row-cols-md-3 g-4 hei">
+
+            <% if (rows.length > 0) { %>
+                <% rows.forEach(value => { %>
+                    <div class="col" onclick="ShowDataAccToCategory(<%= value.category_id %>)">
+                        <div class="card">
+                            <img src="<%= value.category_logo %>" height="250px" width="250px"  alt="...">
+                            <div class="card-body">
+                                <h5 class="card-title text-center"><%= value.category_name %></h5>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } %>
+
+            <!--            <div class="col">-->
+            <!--                <div class="card">-->
+            <!--                    <img src="assets/images/category/category-2.png"  alt="...">-->
+            <!--                    <div class="card-body">-->
+            <!--                        <h5 class="card-title text-center">Diary</h5>-->
+            <!--                    </div>-->
+            <!--                </div>-->
+            <!--            </div>-->
+            <!--            <div class="col">-->
+            <!--                <div class="card">-->
+            <!--                    <img src="assets/images/category/category-4.png" alt="...">-->
+            <!--                    <div class="card-body">-->
+            <!--                        <h5 class="card-title text-center">Fruits</h5>-->
+            <!--                    </div>-->
+            <!--                </div>-->
+            <!--            </div>-->
+        </div>
+    </section>
+
+</div>
+<!--Category  end-->
+<!-- Products -->
+<div class="container py-5">
+    <div class="text-center">
+        <h2 class="text-dark">Latest Products</h2>
+    </div>
+
+    <div class="row" id="productsDiv"></div>
+</div>
+
+<%- include("footer") %>
+<%- include("footer_scripts") %>
+
+<script>
+    const ShowDataAccToCategory = (id) => {
+        // console.log(id);
+        var http = new XMLHttpRequest();
+        http.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                // console.log(JSON.parse(this.response));
+                var products = JSON.parse(this.response);
+                // console.log(products.length);
+
+
+                var cardsHTML = ``;
+                if (products.length == 0) {
+                    cardsHTML += `<div class="alert alert-danger"><h2 class="text-center">no data found</h2></div>`;
+                } else {
+
+                    products.forEach(value => {
+                        // console.log(value);
+
+                        cardsHTML += `<div class="col-lg-3">`;
+                        cardsHTML += `<div class="card">`
+                        cardsHTML += `<img src="${value.photo}" height="200" alt="">`
+
+                        cardsHTML += `<div class="card-body text-center">`;
+                        cardsHTML += `<h5>${value.product_name}</h5>`;
+
+                        cardsHTML += `<del class="text-danger">&#x20b9;${value.price}</del>`;
+                        var discountPrice = value.price - (value.price * value.discount) / 100;
+                        cardsHTML += `<span class="text-success mx-5">&#x20b9;${Math.round(discountPrice)}</span>`;
+                        cardsHTML += `<span class="">${value.discount}%</span>`;
+
+                        cardsHTML += '<button onclick=\'AddToCart(' + JSON.stringify(value) + ')\' type="button" class="btn btn-danger mt-3 text-white">Add To Cart <i class="fa fa-shopping-cart"></i></button>';
+
+                        cardsHTML += `</div>`;
+
+                        cardsHTML += `</div>`
+                        cardsHTML += `</div>`
+                    });
+                }
+
+                document.getElementById("productsDiv").innerHTML = cardsHTML;
+            }
+        }
+        http.open("GET", `/fetch-products-acc-to-category?id=${id}`, true);
+        http.send();
+    }
+
+    var AddToCart = (object) => {
+        // console.log(object);
+
+        var formData = new FormData();
+        formData.append("action", "add");
+        formData.append("productObject", JSON.stringify(object));
+
+        var http = new XMLHttpRequest();
+        http.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                // console.log(this.response);
+
+                if (this.response == "success") {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Product Added In Cart",
+                        confirmButtonColor: "#198754",
+                    });
+                } else {
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Product Already In Cart"
+                    });
+                }
+
+            }
+        }
+        http.open("POST", "/add-to-cart", true);
+        http.send(formData);
+    }
+
+
+    var getProduct = () => {
+        var http = new XMLHttpRequest();
+        http.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                // console.log(JSON.parse(this.response));
+                var products = JSON.parse(this.response);
+                // console.log(products.length);
+
+                var cardsHTML = ``;
+
+                if (products.length == 0) {
+                    cardsHTML += `<div class="alert alert-danger"><h2 class="text-center">no data found</h2></div>`;
+                } else {
+                    products.forEach(value => {
+                        // console.log(value);
+
+                        cardsHTML += `<div class="col-lg-3">`;
+                        cardsHTML += `<div class="card">`
+                        cardsHTML += `<img src="${value.photo}" height="200" alt="">`
+
+                        cardsHTML += `<div class="card-body text-center">`;
+                        cardsHTML += `<h5>${value.product_name}</h5>`;
+
+                        cardsHTML += `<del class="text-danger">&#x20b9;${value.price}</del>`;
+                        var discountPrice = value.price - (value.price * value.discount) / 100;
+                        cardsHTML += `<span class="text-success mx-5">&#x20b9;${Math.round(discountPrice)}</span>`;
+                        cardsHTML += `<span class="">${value.discount}%</span>`;
+
+                        cardsHTML += '<button onclick=\'AddToCart(' + JSON.stringify(value) + ')\' type="button" style="text-decoration:none; background: #389f38;color: #fff" class="btn mt-3" >Add To Cart <i class="fa fa-shopping-cart"></i></button>';
+
+                        cardsHTML += `</div>`;
+
+                        cardsHTML += `</div>`
+                        cardsHTML += `</div>`
+                    });
+                }
+
+                document.getElementById("productsDiv").innerHTML = cardsHTML;
+
+            }
+        }
+        http.open("GET", "/get-products", true);
+        http.send();
+    }
+</script>
+
+</body>
+</html>

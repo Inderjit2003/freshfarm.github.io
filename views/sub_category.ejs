@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Manage Sub-Category</title>
+
+    <%- include('header_files') %>
+</head>
+<body onload="getSubCategory()">
+
+<%- include('navbar') %>
+
+<div class="container mt-5 py-5">
+    <div class="text-center">
+        <h2 class="text-decoration-underline">Manage Sub-Category</h2>
+    </div>
+
+    <button data-bs-target="#subCategoryModal" data-bs-toggle="modal"
+            type="button" class="btn btn-success">
+        <i class="fa fa-plus"></i>
+        Add New Sub-Category
+    </button>
+
+    <!-- Category Table -->
+    <table class="table table-bordered table-dark table-hover mt-5 text-center">
+        <thead>
+        <tr>
+            <th>Sr. No.</th>
+            <th>Sub-Category Name</th>
+            <th colspan="2">Action</th>
+        </tr>
+        </thead>
+
+        <tbody id="subCategoryRows"></tbody>
+    </table>
+
+</div>
+
+<!-- ADD -->
+<div class="modal fade" id="subCategoryModal">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Sub-Category</h2>
+            </div>
+
+            <div class="modal-body">
+
+                <form id="subCategoryForm">
+
+                    <div class="mb-3">
+                        <label for="category">Select Category</label>
+                        <select name="category" id="category" class="form-control">
+                            <option value="">Please Select Category</option>
+
+                            <% for(var i = 0; i < category.length;i++) { %>
+                                <option value="<%= category[i].category_id %>"><%= category[i].category_name %></option>
+                            <% } %>
+
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="subCategory">Enter Sub Category Name</label>
+                        <input type="text" class="form-control" id="subCategory">
+                    </div>
+
+                    <div class="mb-3">
+                        <button onclick="SaveSubCategory()" type="button" class="btn btn-success">SAVE</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- UPDATE -->
+<div class="modal fade" id="subCategoryModalEdit">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Update/Edit Sub-Category</h2>
+            </div>
+
+            <div class="modal-body">
+
+                <form id="subCategoryFormEdit">
+
+                    <div class="mb-3">
+                        <label for="category">Select Category</label>
+                        <select name="category" id="categoryEdit" class="form-control">
+                            <option value="">Please Select Category</option>
+
+                            <% for(var i = 0; i < category.length;i++) { %>
+                                <option value="<%= category[i].category_id %>"><%= category[i].category_name %></option>
+                            <% } %>
+
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="subCategory">Enter Sub Category Name</label>
+                        <input type="text" class="form-control" id="subCategoryEdit">
+                    </div>
+
+                    <input type="hidden" id="subCategoryID">
+
+                    <div class="mb-3">
+                        <button onclick="UpdateSubCategory()" type="button" class="btn btn-success">UPDATE</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include("footer_scripts") %>
+
+<script>
+    var SaveSubCategory = () => {
+        var category = document.getElementById("category").value;
+        var subCategory = document.getElementById("subCategory").value;
+        console.log(category, subCategory);
+
+        var formData = new FormData();
+        formData.append("category", category);
+        formData.append("subCategory", subCategory);
+
+        var http = new XMLHttpRequest();
+        http.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                console.log(this.response);
+
+                if (this.response == "added") {
+                    getSubCategory();
+                    document.getElementById("subCategoryForm").reset();
+
+                    $("#subCategoryModal").modal("hide");
+
+                    Swal.fire({
+                        icon: "success",
+                        title: "New Sub-Category Added Successfully.",
+                        confirmButtonColor: "#198754",
+                    });
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Internal Server Error"
+                    });
+                }
+
+            }
+        }
+        http.open("POST", "/add-sub-category", true);
+        http.send(formData);
+    }
+
+    var getSubCategory = () => {
+        var http = new XMLHttpRequest();
+        http.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+
+                if (this.response == "error") {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Internal Server Error"
+                    });
+                } else {
+                    // console.log(JSON.parse(this.response));
+
+                    var data = JSON.parse(this.response);
+
+                    var tbodyHTML = ``;
+
+                    for (var i = 0; i < data.length; i++) {
+                        tbodyHTML += `<tr>`;
+                        tbodyHTML += `<td>${i + 1}</td>`;
+                        tbodyHTML += `<td>${data[i].subcategory_name}</td>`;
+
+                        tbodyHTML += `<td>`;
+                        tbodyHTML += `<button onclick="DeleteSubCategory(${data[i].subcategory_id})" type="button" class="btn btn-sm btn-danger"><i class="fa-solid fa-trash-can"></i></button>`;
+                        tbodyHTML += `</td>`;
+
+                        tbodyHTML += `<td>`;
+                        tbodyHTML += `<button onclick="ShowDataInModal(${data[i].subcategory_id}, '${data[i].subcategory_name}', ${data[i].category})" data-bs-target="#subCategoryModalEdit" data-bs-toggle="modal" type="button" class="btn btn-sm btn-primary"><i class="fa-solid fa-marker"></i></button>`;
+                        tbodyHTML += `</td>`;
+
+                        tbodyHTML += `</tr>`;
+                    }
+
+                    document.getElementById("subCategoryRows").innerHTML = tbodyHTML;
+
+                }
+            }
+        }
+        http.open("GET", "/fetch-sub-category-from-server", true);
+        http.send();
+    }
+
+    var ShowDataInModal = (subCatID, subCatName, categoryID) => {
+        console.log(subCatID, subCatName, categoryID);
+        document.getElementById("subCategoryEdit").value = subCatName;
+        document.getElementById("categoryEdit").value = categoryID;
+        document.getElementById("subCategoryID").value = subCatID;
+    }
+
+    var DeleteSubCategory = (id) => {
+        if (confirm("Are you sure to delete?")) {
+            var http = new XMLHttpRequest();
+            http.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+
+                    if (this.response == "error") {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Internal Server Error"
+                        });
+                    } else {
+                        getSubCategory();
+                        Swal.fire({
+                            icon: "success",
+                            title: "Sub-Category Deleted Successfully.",
+                            confirmButtonColor: "#198754",
+
+                        });
+                    }
+
+                }
+            }
+            http.open("GET", `/delete-sub-category?id=${id}`, true);
+            http.send();
+        }
+    }
+
+    var UpdateSubCategory = () => {
+        var category = document.getElementById("categoryEdit").value;
+        var subCategory = document.getElementById("subCategoryEdit").value;
+        var subCategory_ID = document.getElementById("subCategoryID").value;
+
+        var formData = new FormData();
+        formData.append("category", category);
+        formData.append("subCategory", subCategory);
+        formData.append("subCategory_ID", subCategory_ID);
+
+        var http = new XMLHttpRequest();
+        http.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                // console.log(this.response);
+                if (this.response == "error") {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Internal Server Error"
+                    });
+                } else {
+                    getSubCategory();
+                    $("#subCategoryModalEdit").modal("hide");
+                    Swal.fire({
+                        icon: "success",
+                        title: "SubCategory Updated.",
+                        confirmButtonColor: "#198754",
+
+                    });
+                }
+            }
+        }
+        http.open("POST", "/update-sub-category", true);
+        http.send(formData);
+    }
+</script>
+</body>
+</html>

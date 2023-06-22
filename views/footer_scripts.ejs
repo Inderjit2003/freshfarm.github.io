@@ -1,0 +1,24 @@
+<script src="../bootstrap/js/bootstrap.js"></script>
+<script src="../javascripts/jquery.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"
+        integrity="sha512-rstIgDs0xPgmG6RX1Aba4KV5cWJbAMcvRCVmglpam9SoHZiUCyQVDdH2LPlxoHtrv17XWblE/V/PP+Tr04hbtA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script>
+    var LogoutAdmin = () => {
+        if (confirm("Are you sure to Logout?")) {
+            var http = new XMLHttpRequest();
+            http.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    // console.log(this.response);
+                    if (this.response == "success") {
+                        window.location.href = "/admin-login";
+                    }
+                }
+            }
+            http.open("GET", "/logout-admin", true);
+            http.send();
+        }
+    }
+</script>

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Generate PDF</title>
+    <%- include('header_files') %>
+</head>
+<body>
+
+<div class="container py-5 mt-5">
+    <button id="btn" type="button" class="btn btn-success">Download PDF</button>
+    <hr>
+    <div id="pdfDiv" class="p-3">
+        <h1 class="text-danger text-decoration-underline">HTML to PDF</h1>
+
+        <p class="text-success" style="text-align: justify">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus aperiam
+            asperiores beatae, cupiditate
+            ipsa
+            officia quasi qui quo sed sit temporibus voluptatum? Deleniti, dignissimos impedit, ipsum minima nam
+            necessitatibus, odit officia pariatur perferendis quis reprehenderit sequi sint veniam. Aliquam, labore.</p>
+
+        <p class="text-success" style="text-align: justify">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus aperiam
+            asperiores beatae, cupiditate
+            ipsa
+            officia quasi qui quo sed sit temporibus voluptatum? Deleniti, dignissimos impedit, ipsum minima nam
+            necessitatibus, odit officia pariatur perferendis quis reprehenderit sequi sint veniam. Aliquam, labore.</p>
+
+        <p class="text-success" style="text-align: justify">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus aperiam
+            asperiores beatae, cupiditate
+            ipsa
+            officia quasi qui quo sed sit temporibus voluptatum? Deleniti, dignissimos impedit, ipsum minima nam
+            necessitatibus, odit officia pariatur perferendis quis reprehenderit sequi sint veniam. Aliquam, labore.</p>
+
+        <img src="images/slider/1.jpg" alt="">
+
+        <ul>
+            <li>HTML</li>
+            <li>CSS</li>
+            <li>JAVASCRIPT</li>
+        </ul>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" referrerpolicy="no-referrer"></script>
+<script src="printThis/printThis.js"></script>
+<script>
+    $(document).ready(() => {
+        $("#btn").click(() => {
+           $("#pdfDiv").printThis();
+        });
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>My Orders</title>
+    <%- include('../header_files') %>
+</head>
+<body onload="getMyOrdersData();">
+
+<%- include("user_navbar") %>
+
+<div class="container mt-5 py-5">
+    <div class="text-center">
+        <h2 class="text-decoration-underline">My Orders</h2>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-dark">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Order Date</th>
+                <th>Address</th>
+                <th>Payment Mode</th>
+                <th>Payment Status</th>
+                <th>Order Status</th>
+            </tr>
+            </thead>
+
+            <tbody id="pendingOrder"></tbody>
+        </table>
+    </div>
+</div>
+
+<%- include("../footer_scripts") %>
+
+<script>
+    function getMyOrdersData() {
+        var http = new XMLHttpRequest();
+        http.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                if (this.response == "error") {
+                    Swal.fire({
+                        icon:'error',
+                        title: 'Internal Server Error'
+                    });
+                } else {
+                    var response = JSON.parse(this.response);
+                    // console.log(response);
+                    var table = "";
+
+                    if (response.length == 0) {
+                        table = `<tr><th colspan="7" class="text-center"><h2 class="text-danger">No Data Found</h2></th></tr>`;
+                        document.getElementById("pendingOrder").innerHTML = table;
+                    } else {
+                        for (var i = 0; i < response.length; i++) {
+                            table += `<tr>`;
+                            table += `<td>${i + 1}</td>`;
+                            table += `<td>${response[i].date_time}</td>`;
+                            table += `<td>${response[i].address}, ${response[i].city} ${response[i].pincode}</td>`;
+                            table += `<td>${response[i].payment_mode}</td>`;
+                            table += `<td>${response[i].payment_status}</td>`;
+                            table += `<td>${response[i].order_status}</td>`;
+                            if (response[i].order_status == "Pending") {
+                                table += `<tr>`;
+                                table += `<td>`;
+                                table += `<td>`;
+                                table += `<td>`;
+                                table += `<td>`;
+                                table += `<td>`;
+                                table += `<button onclick="CancelMyOrder(${response[i].id})" type="button" class="btn btn-danger btn-sm">Cancel Order</button>`;
+                                table += `</td>`;
+                                table += `</td>`;
+                                table += `</td>`;
+                                table += `</td>`;
+                                table += `</td>`;
+                                table += `</tr>`;
+
+                            }
+
+                            table += `</tr>`;
+
+                        }
+                        document.getElementById("pendingOrder").innerHTML = table;
+                    }
+                }
+            }
+        }
+        http.open("GET", "/users/fetch-my-order", true);
+        http.send();
+    }
+
+    var CancelMyOrder = (order_id) => {
+        if (confirm("Are you sure to cancel this order?")) {
+            var http = new XMLHttpRequest();
+            http.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    console.log(this.response);
+                    if (this.response == "error") {
+                        // Swal.fire({})
+                    } else {
+                        getMyOrdersData();
+                        Swal.fire({
+                            icon: "success",
+                            title: "Order Cancelled.",
+                            confirmButtonColor: "#198754"
+                        });
+                    }
+                }
+            }
+            http.open("GET", `/users/cancel-my-order?oid=${order_id}`, true);
+            http.send();
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Manage Products</title>
+
+    <%- include('header_files') %>
+</head>
+<body onload="getProductFromServer()">
+
+<%- include('navbar') %>
+
+<div class="container mt-5 py-5">
+    <div class="text-center">
+        <h2 class="text-decoration-underline">Manage Products</h2>
+    </div>
+
+    <button data-bs-target="#productModal" data-bs-toggle="modal"
+            type="button" class="btn btn-success">
+        <i class="fa fa-plus"></i>
+
+        Add New Product
+    </button>
+
+    <!-- Product Table -->
+    <table class="table table-bordered table-dark table-hover mt-5 text-center">
+        <thead>
+        <tr>
+            <th>Sr. No.</th>
+            <th>Product Name</th>
+            <th>Photo</th>
+            <th>Price</th>
+            <th>Discount</th>
+            <th>Description</th>
+            <th>Delete</th>
+        </tr>
+        </thead>
+
+        <tbody id="productRows"></tbody>
+    </table>
+</div>
+
+<!--Add new Product-->
+
+<div class="modal fade" id="productModal">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Product</h2>
+            </div>
+
+            <div class="modal-body">
+
+                <form id="productForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="category">Category</label>
+                                <select onchange="getSubcategory(this.value)" name="category" id="category"
+                                        class="form-control">
+                                    <option value="">
+                                        Please Select Category
+                                    </option>
+
+                                    <% for(var i = 0; i < category.length;i++) { %>
+                                        <option value="<%= category[i].category_id %>">
+                                            <%= category[i].category_name %>
+                                        </option>
+                                    <% } %>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="subcategory">Sub-Category</label>
+                                <select name="subcategory" id="subcategory" class="form-control">
+                                    <option value="">Please Select Sub-Category</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="productName">Product Name</label>
+                                <input type="text" id="productName" name="productName" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="photo">Photo</label>
+                                <input type="file" id="photo" name="photo" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="price">Price</label>
+                                <input type="number" id="price" name="price" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="discount">Discount (%)</label>
+                                <input type="number" id="discount" name="discount" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label for="description">Product Description</label>
+                                <textarea name="description" id="description" class="form-control"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <button onclick="SaveProduct()" type="button" class="btn btn-success">SAVE</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include("footer_scripts") %>
+
+<script>
+
+    /* View Product */
+    var getProductFromServer = () => {
+        var http = new XMLHttpRequest();
+        http.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                // console.log(JSON.parse(this.response));
+
+                var serverResponse = JSON.parse(this.response);
+
+                var html = ``;
+                for (var i = 0; i < serverResponse.length; i++) {
+                    html += `<tr>`;
+                    html += `<td>${i + 1}</td>`;
+                    html += `<td>${serverResponse[i].product_name}</td>`;
+                    html += `<td><img src="${serverResponse[i].photo}" height="60px" width="60px" alt=""></td>`;
+                    html += `<td>${serverResponse[i].price}</td>`;
+                    html += `<td>${serverResponse[i].discount}</td>`;
+                    html += `<td>${serverResponse[i].description}</td>`;
+
+                    html += `<td>`;
+                    html += `<button onclick="DeleteProduct(${serverResponse[i].id})" type="button" class="btn btn-sm btn-danger"><i class="fa-solid fa-trash-can"></i></button>`;
+                    html += `</td>`;
+
+                    html += `</tr>`;
+                }
+
+                document.getElementById("productRows").innerHTML = html;
+            }
+        }
+
+        http.open("GET", `/view-product`, true);
+        http.send();
+    }
+
+    var DeleteProduct = (id) => {
+        console.log(id);
+    }
+
+    /* Add Product */
+    var SaveProduct = () => {
+        var subcategory = document.getElementById("subcategory").value;
+        var productName = document.getElementById("productName").value;
+        var price = document.getElementById("price").value;
+        var discount = document.getElementById("discount").value;
+        var description = document.getElementById("description").value;
+        var photo = document.getElementById("photo").files[0];
+        // console.log(photo.size);
+        // console.log(photo.size / 1024);
+
+        var fileName = photo.name;
+        // console.log(fileName);
+        // console.log(fileName.endsWith("png"));
+        var validPhoto = fileName.endsWith("png") || fileName.endsWith("jpg");
+
+        var fileSize = photo.size / 1024;
+
+        if (fileSize > 500) {
+            Swal.fire({
+                icon: "warning",
+                title: "File size must be less than 500KB."
+
+            });
+        } else if (!validPhoto) {
+            Swal.fire({
+                icon: "warning",
+                title: "Please select PNG file."
+            })
+        } else {
+            var formData = new FormData();
+            formData.append("subcategory", subcategory);
+            formData.append("productName", productName);
+            formData.append("price", price);
+            formData.append("discount", discount);
+            formData.append("description", description);
+            formData.append("image", photo);
+
+            var http = new XMLHttpRequest();
+            http.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    // console.log(this.response);
+                    if (this.response == "error") {
+                        Swal.fire({
+                            icon: "warning",
+                            title: "Internal Server Error."
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: "success",
+                            title: "New Product Added Successfully",
+                            confirmButtonColor: "#198754"
+                        });
+                        document.getElementById("productForm").reset();
+                    }
+                }
+            }
+
+            http.open("POST", `/add-product`, true);
+            http.send(formData);
+        }
+    }
+
+    var getSubcategory = (categoryID) => {
+        // console.log(categoryID);
+
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                // console.log(JSON.parse(this.response));
+
+                var serverResponse = JSON.parse(this.response);
+
+                var options = `<option value="">Please Select Sub-Category</option>`;
+
+                for (var i = 0; i < serverResponse.length; i++) {
+                    options += `<option value="${serverResponse[i].subcategory_id}">${serverResponse[i].subcategory_name}</option>`;
+                }
+                document.getElementById("subcategory").innerHTML = options;
+            }
+        }
+        xhttp.open("GET", `/fetch-subcategory-related-to-category?category_id=${categoryID}`, true);
+        xhttp.send()
+
+    }
+</script>
+
+</body>
+</html>

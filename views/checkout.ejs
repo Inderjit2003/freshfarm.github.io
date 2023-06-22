@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Shopping Cart</title>
+    <%- include('header_files') %>
+</head>
+<body onload="GetCartProducts()">
+
+<%- include('guest_navbar') %>
+
+<div class="container mt-5 py-5">
+    <div>
+        <h2 class="text-success text-center">Shopping Cart</h2>
+
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Product Name</th>
+                <th>Price</th>
+                <th>Discount</th>
+                <th>Quantity</th>
+                <th>Net Price</th>
+                <th>Remove</th>
+            </tr>
+            </thead>
+
+            <tbody id="shoppingCart"></tbody>
+        </table>
+
+        <div class="mt-5">
+            <h2>Billing Details</h2>
+            <hr>
+            <form id="checkoutForm">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="city">City <span class="text-danger">*</span></label>
+                        <select name="city" id="city" class="form-control">
+                            <option value="">Please Select City</option>
+                            <option value="Amritsar">Amritsar</option>
+                            <option value="Jalandhar">Jalandhar</option>
+                            <option value="Ludhiana">Ludhiana</option>
+                            <option value="Agra">Agra</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="pincode">Enter Pincode <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="pincode">
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="address">Enter Address <span class="text-danger">*</span></label>
+                        <textarea name="address" id="address" class="form-control"></textarea>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="remarks">Remarks <span class="text-muted">(Optional)</span></label>
+                        <textarea name="remarks" id="remarks" class="form-control"></textarea>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="">Payment Mode</label> <br>
+                        <input checked type="radio" name="payment" id="COD" value="COD"> <label for="COD">COD</label>
+                        <input type="radio" name="payment" id="Online" value="Online"> <label
+                                for="Online">Online</label>
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <button onclick="PlaceOrder()" type="button" class="btn btn-success">Pay Now</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<%- include("footer_scripts") %>
+
+<script>
+    var GetCartProducts = () => {
+        var formData = new FormData();
+        formData.append("action", "getproducts");
+
+        var http = new XMLHttpRequest();
+        http.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                // console.log(this.response);
+                // console.log(this.response.length);
+
+                // if (this.response.length <= 0) {
+                if (this.response == "") {
+                    document.getElementById("shoppingCart").innerHTML = "<tr><td colspan='6' class='text-danger text-center'><h4>No Products in Cart</h4></td></tr>"
+                } else {
+                    // console.log(JSON.parse(this.response));
+
+                    var cart = JSON.parse(this.response);
+
+                    var tbodyHTML = ``;
+
+                    var grandTotal = 0;
+
+                    cart.forEach((value, index) => {
+                        // console.log(value);
+
+                        tbodyHTML += `<tr>`;
+                        tbodyHTML += `<td>${index + 1}</td>`;
+
+                        tbodyHTML += `<td>`;
+                        tbodyHTML += `<img src="${value.photo}" height="60px" alt="">`;
+                        tbodyHTML += `${value.product_name}`;
+                        tbodyHTML += `</td>`;
+
+                        tbodyHTML += `<td>&#x20b9;${value.price}</td>`;
+                        tbodyHTML += `<td>${value.discount}%</td>`;
+
+                        tbodyHTML += `<td>`;
+                        tbodyHTML += `<button onclick="UpdateQuantity('minus', ${value.id})" type="button" class="btn btn-sm btn-warning"><i class="fa fa-minus"></i></button>`;
+                        tbodyHTML += `<span class="mx-3">${value.quantity}</span>`;
+                        tbodyHTML += `<button onclick="UpdateQuantity('plus', ${value.id})" type="button" class="btn btn-sm btn-warning"><i class="fa fa-plus"></i></button>`;
+                        tbodyHTML += `</td>`;
+
+                        grandTotal += value.discountPrice * value.quantity;
+
+                        tbodyHTML += `<td>&#x20b9;${value.quantity * value.discountPrice}</td>`;
+
+                        tbodyHTML += `<td>`;
+                        tbodyHTML += `<button onclick="RemoveProduct(${value.id})" type="button" class="btn btn-sm btn-danger"><i class="fa fa-times"></i></button>`;
+                        tbodyHTML += `</td>`;
+
+                        tbodyHTML += `</tr>`;
+                    });
+
+                    tbodyHTML += `<tr>`;
+                    tbodyHTML += `<td colspan="5"></td>`;
+                    tbodyHTML += `<td>Grand Total : &#x20b9;<span id="grandTotal">${grandTotal}</span></td>`;
+                    tbodyHTML += `<td></td>`;
+                    tbodyHTML += `</tr>`;
+
+                    // tbodyHTML += `<tr>`;
+                    // tbodyHTML += `<td colspan="5"></td>`;
+                    // tbodyHTML += `<td>`;
+                    // tbodyHTML += `<a href="/check-user-session" class="btn btn-success">Proceed To Checkout</a>`;
+                    // tbodyHTML += `</td>`;
+                    // tbodyHTML += `</tr>`;
+
+                    document.getElementById("shoppingCart").innerHTML = tbodyHTML;
+
+                }
+            }
+        }
+        http.open("POST", "/add-to-cart", true);
+        http.send(formData);
+    }
+
+    var RemoveProduct = (pid) => {
+        if (confirm("Are you sure")) {
+            var formData = new FormData();
+            formData.append("action", "remove");
+            formData.append("pid", pid);
+            var http = new XMLHttpRequest();
+            http.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    // console.log(this.response);
+                    if (this.response == "updated") {
+                        GetCartProducts();
+                    }
+                }
+            }
+
+            http.open("POST", "/add-to-cart", true);
+            http.send(formData);
+        }
+    }
+
+    var UpdateQuantity = (action, pid) => {
+        // console.log(action, pid);
+        var formData = new FormData();
+        formData.append("action", action);
+        formData.append("pid", pid);
+
+
+        var http = new XMLHttpRequest();
+        http.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                // console.log(this.response);
+                if (this.response == "updated") {
+                    GetCartProducts();
+                }
+            }
+        }
+
+        http.open("POST", "/add-to-cart", true);
+        http.send(formData);
+    }
+
+    var PlaceOrder = () => {
+        var grandTotal = document.getElementById("grandTotal").innerText;
+        var city = document.getElementById("city").value;
+        var pincode = document.getElementById("pincode").value;
+        var address = document.getElementById("address").value;
+        var remarks = document.getElementById("remarks").value;
+        var payment_mode = document.getElementById("COD").value;
+
+        if (document.getElementById("Online").checked) {
+            payment_mode = document.getElementById("Online").value;
+        }
+
+        var formData = new FormData();
+        formData.append("grandTotal", grandTotal);
+        formData.append("city", city);
+        formData.append("pincode", pincode);
+        formData.append("address", address);
+        formData.append("remarks", remarks);
+        formData.append("payment_mode", payment_mode);
+
+        var http = new XMLHttpRequest();
+        http.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                console.log(this.response);
+                if (this.response == "success") {
+                    window.location.href = "/users/thank-you";
+                } else {
+                    window.location.href = "/users/razorpay";
+                }
+            }
+        }
+        http.open("POST", "/users/place-new-order", true);
+        http.send(formData);
+    }
+</script>
+
+</body>
+</html>

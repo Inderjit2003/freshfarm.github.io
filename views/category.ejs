@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Manage Category</title>
+
+    <%- include('header_files') %>
+</head>
+<body onload="GetDataFromServer()">
+
+<%- include('navbar') %>
+
+<div class="container mt-5 py-5">
+    <div class="text-center">
+        <h2 class="text-decoration-underline text-dark">Manage Category</h2>
+    </div>
+
+<!--    <button type="button" class="btn btn-info" onclick="SweetAlert()">-->
+<!--        Sweet Alerts-->
+<!--    </button>-->
+
+    <button data-bs-target="#categoryModal" data-bs-toggle="modal"
+            type="button" class="btn btn-success">
+        <i class="fa fa-plus"></i>
+        <!--       <i class="fa fa-plus-circle"></i> -->
+        <!--       <i class="fa fa-plus-square"></i>-->
+        Add New Category
+    </button>
+
+    <!-- Category Table -->
+    <table class="table table-bordered table-dark table-hover mt-5 text-center">
+        <thead>
+        <tr>
+            <th>Sr. No.</th>
+            <th>Category Name</th>
+            <th colspan="2">Action</th>
+        </tr>
+        </thead>
+
+        <tbody id="categoryRows"></tbody>
+    </table>
+</div>
+
+<div class="modal fade" id="categoryModal">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Category</h2>
+            </div>
+
+            <div class="modal-body">
+
+                <form id="categoryForm">
+                    <div class="mb-3">
+                        <label for="category">Enter Category Name</label>
+                        <input type="text" class="form-control" id="category">
+                    </div>
+
+                    <div class="mb-3">
+                        <button onclick="SaveCategory()" type="button" class="btn btn-success">SAVE</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="categoryEditModal">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Update/Edit Category</h2>
+            </div>
+
+            <div class="modal-body">
+
+                <form id="categoryEditForm">
+                    <div class="mb-3">
+                        <label for="category">Enter Category Name</label>
+                        <input type="text" class="form-control" id="categoryEdit">
+                    </div>
+
+                    <div class="mb-3">
+                        <input type="hidden" class="form-control" id="category_id">
+                    </div>
+
+                    <div class="mb-3">
+                        <button onclick="UpdateCategory()" type="button" class="btn btn-success">UPDATE</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include("footer_scripts") %>
+
+<script>
+    var GetDataFromServer = () => {
+        var http = new XMLHttpRequest();
+        http.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                // console.log(JSON.parse(this.response));
+
+
+                if (this.response == "error") {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Internal Server Error."
+                    });
+                } else {
+                    // console.log(JSON.parse(this.response));
+                    var response = JSON.parse(this.response);
+
+                    var tableHTML = ``;
+
+                    for (var i = 0; i < response.length; i++) {
+                        tableHTML += `<tr>`;
+                        tableHTML += `<td>${i + 1}</td>`;
+                        tableHTML += `<td>${response[i].category_name}</td>`;
+
+                        tableHTML += `<td>`;
+                        tableHTML += `<button onclick="DeleteCategory(${response[i].category_id})" type="button" class="btn btn-sm btn-danger"><i class="fa-solid fa-trash-can"></i></button>`;
+                        tableHTML += `</td>`;
+
+                        tableHTML += `<td>`;
+                        tableHTML += `<button onclick="ShowDataInModal(${response[i].category_id}, '${response[i].category_name}')" data-bs-target="#categoryEditModal" data-bs-toggle="modal" type="button" class="btn btn-sm btn-primary"><i class="fa-solid fa-marker"></i></button>`;
+                        tableHTML += `</td>`;
+
+                        tableHTML += `</tr>`;
+                    }
+
+                    document.getElementById("categoryRows").innerHTML = tableHTML;
+
+                }
+
+            }
+        }
+        http.open("GET", "/get-category-from-server", true);
+        http.send();
+    }
+
+    var UpdateCategory = () => {
+        // var category = document.getElementById("categoryEditForm").elements;
+        var category_name = document.getElementById("categoryEdit").value;
+        var category_id = document.getElementById("category_id").value;
+
+        var formData = new FormData();
+        formData.append("category", category_name);
+        formData.append("category_id", category_id);
+
+        var http = new XMLHttpRequest();
+        http.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                console.log(this.response);
+
+                if (this.response == "updated") {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Category Updated",
+                        confirmButtonColor: "#198754",
+                    });
+                    GetDataFromServer();
+                }
+            }
+        }
+        // http.open("POST", "/admin/update-category", true);
+        http.open("POST", "/update-category", true);
+        http.send(formData);
+    }
+
+    var ShowDataInModal = (id, category_name) => {
+        // console.log(id, category_name);
+        document.getElementById("categoryEdit").value = category_name;
+        document.getElementById("category_id").value = id;
+    }
+
+    var DeleteCategory = (category_id) => {
+        // console.log(category_id);
+        // console.log(confirm("Are you sure to delete?"));
+        if (confirm("Are you sure to delete?")) {
+            var formData = new FormData();
+            formData.append("category_id", category_id);
+
+            var http = new XMLHttpRequest();
+            http.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    console.log(this.response);
+
+                    if (this.response == "error") {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Internal Server Error."
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Category Deleted Successfully.",
+                            confirmButtonColor: "#198754",
+                        });
+                        GetDataFromServer();
+                    }
+                }
+            }
+        }
+
+        // http.open("POST", "/admin/delete-category", true);
+        http.open("POST", "/delete-category", true);
+        http.send(formData);
+    }
+
+    var SaveCategory = () => {
+        var category = document.getElementById("category").value;
+
+        var formData = new FormData();
+        formData.append("category", category);
+
+        var http = new XMLHttpRequest();
+        http.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                // console.log(this.response);
+
+                if (this.response == "success") {
+                    // alert("New Category Added Successfully");
+                    document.getElementById("categoryForm").reset();
+
+                    $("#categoryModal").modal("hide");
+
+                    Swal.fire({
+                        icon: "success",
+                        title: "New Category Added Successfully.",
+                        confirmButtonColor: "#198754",
+
+                    });
+
+                    GetDataFromServer()
+
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 3000);
+
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Internal Server Error"
+                    });
+                }
+            }
+        }
+        http.open("POST", "/add-category", true);
+        http.send(formData);
+    }
+
+    // var SweetAlert = () => {
+    //     Swal.fire({
+    //         // icon: "success",
+    //         // icon: "error",
+    //         // icon: "info",
+    //         icon: "question",
+    //         title: "This is a title",
+    //         text: "Hello World!!"
+    //     });
+    // }
+</script>
+
+</body>
+</html>
